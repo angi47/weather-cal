@@ -168,27 +168,6 @@ const custom = {
     }
   }
 }
-
-  // Funktion der henter citat fra nettet
-  async getOnlineQuote() {
-    try {
-      // Vi bruger API'et fra quotable.io
-      const url = "https://api.quotable.io/random?maxLength=100"; 
-      const req = new Request(url);
-      const res = await req.loadJSON();
-      return {
-        content: res.content,
-        author: res.author
-      };
-    } catch (e) {
-      // Fallback hvis internettet driller
-      return {
-        content: "Gør i dag fantastisk.",
-        author: "Motivation"
-      };
-    }
-  }
-};
 // Run the initial setup or settings menu.
 let preview
 if (config.runsInApp) {
