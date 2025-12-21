@@ -126,7 +126,7 @@ const custom = {
   },
 
   async events(column) {
-    const eventData = await code.getEvents()
+    const eventData = await code.getEventsData()
     
     if (eventData && eventData.length > 0) {
       await code.events(column)
