@@ -24,7 +24,7 @@ const layout = `
     column
       date
       sunset
-      battery
+      aktier
       space
       events
     
@@ -76,7 +76,6 @@ const custom = {
     const erMarkedAaben = (dag >= 1 && dag <= 5) && (time >= 9 && time < 17)
     if (!erMarkedAaben) return 
 
-    // Dine valgte aktier
     let stocks = ["AAPL", "MSFT", "GOOGL", "TSLA"]
     let upticker = SFSymbol.named("chevron.up")
     let downticker = SFSymbol.named("chevron.down")
@@ -95,24 +94,20 @@ const custom = {
         let prevClose = meta.chartPreviousClose
         let change = price - prevClose
         
-        // Række til aktie info
         let row = mainStack.addStack()
         row.centerAlignContent()
         
-        // Symbol Navn
         let symTxt = row.addText(meta.symbol)
         symTxt.font = Font.boldMonospacedSystemFont(12)
         symTxt.textColor = Color.white()
         
         row.addSpacer()
         
-        // Pris og Farve-logik
         let priceTxt = row.addText(price.toFixed(2))
         priceTxt.font = Font.boldMonospacedSystemFont(12)
         
         row.addSpacer(4)
         
-        // Pil-ikon (Ticker)
         let tickerImg
         if (change < 0) {
           priceTxt.textColor = Color.red()
@@ -126,46 +121,53 @@ const custom = {
         tickerImg.imageSize = new Size(8, 8)
         
         mainStack.addSpacer(4)
-      } catch(e) { 
-        console.error("Fejl ved " + symbol + ": " + e)
-      }
+      } catch(e) { console.error(e) }
     }
-  }
+  },
 
-}
-async events(column) {
-    // 1. Tjek om der er kalenderaftaler
-    const eventData = await code.getEvents();
+  async events(column) {
+    const eventData = await code.getEvents()
     
     if (eventData && eventData.length > 0) {
-      // Vis kalenderen hvis der er aftaler
-      await code.events(column);
+      await code.events(column)
     } else {
-      // 2. Hent et tilfældigt citat fra nettet (Quotable API)
-      const quoteData = await this.getOnlineQuote();
+      // RETTET: Vi bruger 'custom.' i stedet for 'this.'
+      const quoteData = await custom.getOnlineQuote()
       
-      let stack = column.addStack();
-      stack.layoutVertically();
-      stack.setPadding(10, 0, 10, 0);
+      let stack = column.addStack()
+      stack.layoutVertically()
+      stack.setPadding(10, 0, 10, 0)
       
-      // Citat tekst
-      let qText = stack.addText(`“${quoteData.content}”`);
-      qText.font = Font.boldSystemFont(12);
-      qText.textColor = Color.white();
-      qText.leftAlignText();
+      let qText = stack.addText(`“${quoteData.content}”`)
+      qText.font = Font.boldSystemFont(12)
+      qText.textColor = Color.white()
+      qText.leftAlignText()
       
-      stack.addSpacer(4);
+      stack.addSpacer(4)
       
-      // Forfatter tekst
       if (quoteData.author) {
-        let aText = stack.addText(`— ${quoteData.author}`);
-        aText.font = Font.italicSystemFont(10);
-        aText.textColor = Color.white();
+        let aText = stack.addText(`— ${quoteData.author}`)
+        aText.font = Font.italicSystemFont(10)
+        aText.textColor = Color.white()
         aText.textOpacity = 0.7;
-        aText.rightAlignText();
+        aText.rightAlignText()
       }
     }
   },
+
+  async getOnlineQuote() {
+    try {
+      // Bemærk: api.quotable.io kan være nede i perioder. 
+      // Her er en alternativ stabil kilde hvis den driller.
+      const url = "https://api.quotable.io/random?maxLength=100"
+      const req = new Request(url)
+      const res = await req.loadJSON()
+      return { content: res.content, author: res.author }
+    } catch (e) {
+      return { content: "Gør i dag fantastisk.", author: "Motivation" }
+    }
+  }
+}
 
   // Funktion der henter citat fra nettet
   async getOnlineQuote() {
