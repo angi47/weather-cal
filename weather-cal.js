@@ -68,68 +68,77 @@ const code = importModule(codeFilename)
 const custom = {
 
   async aktier(column) {
-    const nu = new Date()
-    const time = nu.getHours()
-    const dag = nu.getDay() // 1-5 er hverdag
+  const nu = new Date()
+  const time = nu.getHours()
+  const dag = nu.getDay() // 1-5 er hverdag
 
-    // Tjek om markedet er åbent (Man-Fre, 09:00 - 16:59)
-    const erMarkedAaben = (dag >= 1 && dag <= 5) && (time >= 9 && time < 17)
-    if (!erMarkedAaben) return 
+  // Tjek om markedet er åbent (Man-Fre, 09:00 - 16:59)
+  const erMarkedAaben = (dag >= 1 && dag <= 5) && (time >= 9 && time < 17)
+  if (!erMarkedAaben) return 
 
-    let stocks = ["AAPL", "MSFT", "GOOGL", "TSLA"]
-    let upticker = SFSymbol.named("chevron.up")
-    let downticker = SFSymbol.named("chevron.down")
-    
-    let mainStack = column.addStack()
-    mainStack.layoutVertically()
+  let stocks = ["ALTO", "BIOPOR.CO", "NOVO-B.CO", "SAAB-B.ST", "PSNY"]
+  let upticker = SFSymbol.named("chevron.up")
+  let downticker = SFSymbol.named("chevron.down")
+  
+  let mainStack = column.addStack()
+  mainStack.layoutVertically()
 
-    for (let symbol of stocks) {
-      try {
-        let url = "https://query2.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(symbol) + "?interval=1d&range=1d"
-        let req = new Request(url)
-        let res = await req.loadJSON()
-        
-        let meta = res.chart.result[0].meta
-        let price = meta.regularMarketPrice
-        let prevClose = meta.chartPreviousClose
-        let change = price - prevClose
-        
-        let row = mainStack.addStack()
-        row.centerAlignContent()
-        
-        let symTxt = row.addText(meta.symbol)
-        symTxt.font = Font.boldMonospacedSystemFont(12)
-        symTxt.textColor = Color.white()
-        
-        row.addSpacer()
-        
-        let priceTxt = row.addText(price.toFixed(2))
-        priceTxt.font = Font.boldMonospacedSystemFont(12)
-        
-        row.addSpacer(4)
-        
-        let tickerImg
-        if (change < 0) {
-          priceTxt.textColor = Color.red()
-          tickerImg = row.addImage(downticker.image)
-          tickerImg.tintColor = Color.red()
-        } else {
-          priceTxt.textColor = Color.green()
-          tickerImg = row.addImage(upticker.image)
-          tickerImg.tintColor = Color.green()
-        }
-        tickerImg.imageSize = new Size(8, 8)
-        
-        mainStack.addSpacer(4)
-      } catch(e) { console.error(e) }
-    }
-  },
+  for (let symbol of stocks) {
+    try {
+      let url = "https://query2.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(symbol) + "?interval=1d&range=1d"
+      let req = new Request(url)
+      let res = await req.loadJSON()
+      
+      let meta = res.chart.result[0].meta
+      let price = meta.regularMarketPrice
+      let prevClose = meta.chartPreviousClose
+      let change = price - prevClose
+      let percentChange = (change / prevClose) * 100
+      
+      let row = mainStack.addStack()
+      row.centerAlignContent()
+      
+      let symTxt = row.addText(meta.symbol)
+      symTxt.font = Font.boldMonospacedSystemFont(12)
+      symTxt.textColor = Color.white()
+      
+      row.addSpacer()
+      
+      let priceTxt = row.addText(price.toFixed(2))
+      priceTxt.font = Font.boldMonospacedSystemFont(12)
+      
+      row.addSpacer(4)
+      
+      // Vis procent ændring
+      let percentTxt = row.addText(percentChange.toFixed(2) + "%")
+      percentTxt.font = Font.boldMonospacedSystemFont(11)
+      
+      row.addSpacer(4)
+      
+      let tickerImg
+      if (change < 0) {
+        priceTxt.textColor = Color.red()
+        percentTxt.textColor = Color.red()
+        tickerImg = row.addImage(downticker.image)
+        tickerImg.tintColor = Color.red()
+      } else {
+        priceTxt.textColor = Color.green()
+        percentTxt.textColor = Color.green()
+        tickerImg = row.addImage(upticker.image)
+        tickerImg.tintColor = Color.green()
+      }
+      tickerImg.imageSize = new Size(8, 8)
+      
+      mainStack.addSpacer(4)
+    } catch(e) { console.error(e) }
+  }
+},
 
   // Hjælpefunktion til at hente events i de næste 36 timer
   async getEventsNext36Hours() {
     try {
       const now = new Date()
-      const end = new Date(now.getTime() + (36 * 60 * 60 * 1000)) // 36 timer frem
+      const end = new Date(now.getTime() + (24 * 60 * 60 * 1000)) // 36 timer frem
       
       // Hent alle kalendere
       const calendars = await Calendar.forEvents()
