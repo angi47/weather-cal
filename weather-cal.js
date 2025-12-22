@@ -138,7 +138,7 @@ const custom = {
   async getEventsNext36Hours() {
     try {
       const now = new Date()
-      const end = new Date(now.getTime() + (24 * 60 * 60 * 1000)) // 36 timer frem
+      const end = new Date(now.getTime() + (36 * 60 * 60 * 1000)) // 36 timer frem
       
       // Hent alle kalendere
       const calendars = await Calendar.forEvents()
