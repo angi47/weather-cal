@@ -99,7 +99,7 @@ const custom = {
   },
 
   async aktier(column) {
-    let stocks = ["ALTO", "BIOPOR.CO", "NOVO-B.CO", "SAAB-B.ST", "PSNY"]
+    let stocks = ["BIOPOR.CO", "NOVO-B.CO", "SAAB-B.ST", "PSNY"]
     let upticker = SFSymbol.named("chevron.up")
     let downticker = SFSymbol.named("chevron.down")
     
